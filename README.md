@@ -1,6 +1,7 @@
 # Bloggazer
 
 Bloggazer is a modern, visually immersive blogging platform built with React, Vite, and 3D web technologies. It combines high-performance web standards with rich aesthetics to deliver a premium user experience.
+Deploy link : http://blogs-afdaa.web.app/
 
 ## 🚀 Technology Stack
 
