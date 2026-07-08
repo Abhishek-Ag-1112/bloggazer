@@ -1,0 +1,397 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    @apply bg-white dark:bg-gray-950;
+  }
+}
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-in;
+  }
+
+  .animate-fade-in-delay {
+    animation: fadeIn 0.8s ease-in 0.2s backwards;
+  }
+
+  .animate-fade-in-delay-2 {
+    animation: fadeIn 0.8s ease-in 0.4s backwards;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.prose h2 {
+  @apply text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4;
+}
+
+.prose h3 {
+  @apply text-xl font-bold text-gray-900 dark:text-white mt-6 mb-3;
+}
+
+.prose p {
+  @apply text-gray-700 dark:text-gray-300 mb-4 leading-relaxed;
+}
+
+.prose ul {
+  @apply list-disc list-inside mb-4 text-gray-700 dark:text-gray-300;
+}
+
+.prose ol {
+  @apply list-decimal list-inside mb-4 text-gray-700 dark:text-gray-300;
+}
+
+.prose a {
+  @apply text-blue-600 dark:text-blue-400 hover:underline;
+}
+
+.prose code {
+  /* This is the line we fixed */
+  @apply bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-blue-600 pl-4 italic text-gray-700 dark:text-gray-300 my-4;
+}
+
+/* --- ADDED THESE STYLES FOR MARKDOWN TABLES --- */
+.prose table {
+  @apply w-full my-6 border-collapse border border-gray-300 dark:border-gray-700;
+}
+.prose th {
+  @apply bg-gray-100 dark:bg-gray-800 p-3 font-semibold text-left border-b border-gray-300 dark:border-gray-700;
+}
+.prose td {
+  @apply p-3 border-b border-gray-200 dark:border-gray-700;
+}
+.prose tr:last-child td {
+  @apply border-b-0;
+}
+/* --- END OF TABLE STYLES --- */
+
+
+/* --- NProgress Customization --- */
+/* Make the bar blue and thicker */
+#nprogress .bar {
+  background: #3b82f6 !important; /* Tailwind's blue-500 */
+  height: 4px !important;
+}
+
+/* Make the spinner blue */
+#nprogress .spinner-icon {
+  border-top-color: #3b82f6 !important;
+  border-left-color: #3b82f6 !important;
+}
+
+/* Hide the peg (the little shadow) */
+#nprogress .peg {
+  display: none !important;
+}
+
+/* --- React-Mde Glassmorphism Override --- */
+
+/* Main container */
+.react-mde {
+  border: 1px solid rgba(128, 128, 128, 0.3) !important;
+  border-radius: 0.75rem !important; /* 12px, matches rounded-xl */
+  overflow: hidden; /* Ensures glassmorphism clips */
+}
+
+/* The Toolbar */
+.react-mde .mde-header {
+  /* Light mode glassmorphism */
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2) !important;
+  padding: 6px 10px !important;
+}
+
+/* Dark mode for Toolbar */
+.dark .react-mde .mde-header {
+  /* Dark mode glassmorphism */
+  background-color: rgba(31, 41, 55, 0.75) !important; /* dark:bg-gray-800/75 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Toolbar buttons (Bold, Italic, etc.) */
+.react-mde .mde-header .mde-header-item button {
+  color: #374151 !important; /* text-gray-700 */
+  border-radius: 0.375rem !important; /* rounded-md */
+  transition: background-color 0.2s;
+}
+.react-mde .mde-header .mde-header-item button:hover {
+  background-color: rgba(128, 128, 128, 0.1) !important;
+}
+
+/* Dark mode for Toolbar buttons */
+.dark .react-mde .mde-header .mde-header-item button {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+.dark .react-mde .mde-header .mde-header-item button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Write/Preview Tabs */
+.react-mde .mde-tabs button {
+  color: #6b7280 !important; /* text-gray-500 */
+  padding: 8px 12px !important;
+  border-bottom: 2px solid transparent !important;
+}
+.dark .react-mde .mde-tabs button {
+  color: #9ca3af !important; /* text-gray-400 */
+}
+
+/* Active Tab */
+.react-mde .mde-tabs button.selected,
+.react-mde .mde-tabs button:hover {
+  color: #3b82f6 !important; /* text-blue-500 */
+  background: none !important;
+  border-bottom: 2px solid #3b82f6 !important;
+  box-shadow: none !important;
+}
+.dark .react-mde .mde-tabs button.selected,
+.dark .react-mde .mde-tabs button:hover {
+  color: #60a5fa !important; /* text-blue-400 */
+  border-bottom: 2px solid #60a5fa !important;
+}
+
+/* Text Area & Preview - give them solid backgrounds for readability */
+.react-mde .mde-text,
+.react-mde .mde-preview {
+  background-color: #ffffff !important;
+}
+.dark .react-mde .mde-text,
+.dark .react-mde .mde-preview {
+  background-color: #111827 !important; /* dark:bg-gray-900 */
+}
+
+/* Style the text area to match your site */
+.react-mde .mde-text {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 1rem !important;
+  color: #111827 !important; /* dark:text-gray-300 */
+  line-height: 1.6 !important;
+  padding: 1.25rem !important; /* p-5 */
+}
+.dark .react-mde .mde-text {
+  color: #d1d5db !important;
+}
+
+/* --- End of React-Mde Override --- */
+
+/* --- ADDED FOR SEND BUTTON EFFECT --- */
+@keyframes fly-1 {
+  from {
+    transform: translateY(0.1em);
+  }
+  to {
+    transform: translateY(-0.1em);
+  }
+}
+
+/* --- UPDATED FOR SMALLER/FASTER PAGELOADER --- */
+@keyframes abox1 {
+  0% {
+    width: 56px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 0px;
+  }
+  12.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 0px;
+  }
+  25% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 0px;
+  }
+  37.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 0px;
+  }
+  50% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 0px;
+  }
+  62.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 0px;
+  }
+  75% {
+    width: 24px;
+    height: 56px;
+    margin-top: 0px;
+    margin-left: 0px;
+  }
+  87.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 0px;
+  }
+  100% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 0px;
+  }
+}
+
+@keyframes abox2 {
+  0% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 0px;
+  }
+  12.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 0px;
+  }
+  25% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 0px;
+  }
+  37.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 0px;
+  }
+  50% {
+    width: 56px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 0px;
+  }
+  62.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 32px;
+  }
+  75% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 32px;
+  }
+  87.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 32px;
+  }
+  100% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 32px;
+  }
+}
+
+@keyframes abox3 {
+  0% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 32px;
+  }
+  12.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 0px;
+    margin-left: 32px;
+  }
+  25% {
+    width: 24px;
+    height: 56px;
+    margin-top: 0px;
+    margin-left: 32px;
+  }
+  37.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 32px;
+  }
+  50% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 32px;
+  }
+  62.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 32px;
+  }
+  75% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 32px;
+  }
+  87.5% {
+    width: 24px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 32px;
+  }
+  100% {
+    width: 56px;
+    height: 24px;
+    margin-top: 32px;
+    margin-left: 0px;
+  }
+}
