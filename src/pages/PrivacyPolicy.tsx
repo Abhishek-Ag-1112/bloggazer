@@ -29,7 +29,7 @@ const PrivacyPolicy: React.FC = () => {
                         {/* Introduction */}
                         <div className="prose prose-lg dark:prose-invert max-w-none mb-12">
                             <p className="text-lg text-gray-600 dark:text-gray-300">
-                                At Bloggazers.in, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website.
+                                At Bloggazers, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website.
                             </p>
                         </div>
 

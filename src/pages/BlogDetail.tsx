@@ -723,14 +723,14 @@ const BlogDetail: React.FC = () => {
         <title>{blog.title} | Bloggazers</title>
         <meta name="description" content={blog.excerpt} />
         <meta name="keywords" content={blog.tags.join(', ')} />
-        <link rel="canonical" href={`https://bloggazers.in/blog/${blog.slug}`} />
+        <link rel="canonical" href={`https://bloggazersin.netlify.app/blog/${blog.slug}`} />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="article" />
         <meta property="og:title" content={`${blog.title} | Bloggazers`} />
         <meta property="og:description" content={blog.excerpt} />
         <meta property="og:image" content={blog.cover_image} />
-        <meta property="og:url" content={`https://bloggazers.in/blog/${blog.slug}`} />
+        <meta property="og:url" content={`https://bloggazersin.netlify.app/blog/${blog.slug}`} />
         <meta property="og:site_name" content="Bloggazers" />
 
         {/* Twitter */}

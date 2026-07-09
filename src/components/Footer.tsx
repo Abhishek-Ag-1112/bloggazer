@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left order-2 sm:order-1">
-            © {currentYear} Bloggazers.in. All rights reserved.
+            © {currentYear} Bloggazers. All rights reserved.
           </p>
 
           {/* Privacy and Security Links */}
@@ -69,7 +69,7 @@ const Footer: React.FC = () => {
               <Github className="w-5 h-5" />
             </a>
             <a
-              href="mailto:contact@bloggazers.in"
+              href="mailto:contact@bloggazersin.netlify.app"
               className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               aria-label="Email"
             >

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bloggazers.in/sitemap.xml
+Sitemap: https://bloggazersin.netlify.app/sitemap.xml
