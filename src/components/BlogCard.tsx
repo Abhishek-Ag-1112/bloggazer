@@ -37,11 +37,11 @@ const BlogCard: React.FC<BlogCardProps> = ({
   return (
     <article className="group bg-white/65 dark:bg-gray-950/45 rounded-xl overflow-hidden shadow-xl hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-900 flex flex-col">
       <Link to={`/blog/${blog.slug}`} className="block">
-        <div className="relative h-48 overflow-hidden">
+        <div className="relative w-full aspect-video overflow-hidden">
           <img
             src={blog.cover_image}
             alt={blog.title}
-            className="w-full h-full object-cover "
+            className="w-full h-full object-cover"
           />
           <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
             {blog.category}

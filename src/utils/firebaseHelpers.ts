@@ -21,8 +21,8 @@ import {
   QueryConstraint,
   addDoc
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, Timestamp, storage } from '../firebase';
+import { db, Timestamp } from '../firebase';
+import { supabase } from '../supabase';
 import { Blog, BlogBase, User, Comment, CommentBase } from '../types';
 
 // --- User Helpers ---
@@ -386,18 +386,34 @@ export const fetchBookmarkedBlogs = async (userId: string): Promise<Blog[]> => {
 // --- Image Upload Helper ---
 
 /**
- * Uploads an image to Firebase Storage and returns the download URL.
+ * Uploads an image to Supabase Storage and returns the download URL.
  * @param file The file to upload.
- * @param path The storage path (e.g., 'blog-covers' or 'avatars').
- * @returns Promise<string> The download URL of the uploaded image.
+ * @param path The storage folder path (e.g., 'blog-covers' or 'avatars').
+ * @returns Promise<string> The public URL of the uploaded image.
  */
 export const uploadImage = async (file: File, path: string): Promise<string> => {
-  // Create a unique filename to prevent collisions
   const timestamp = Date.now();
   const uniqueName = `${timestamp}_${file.name}`;
-  const storageRef = ref(storage, `${path}/${uniqueName}`);
+  const filePath = `${path}/${uniqueName}`;
+  
+  // Default bucket named 'images' (ensure this bucket exists and is set to public in Supabase Console)
+  const bucketName = 'images';
 
-  await uploadBytes(storageRef, file);
-  const downloadURL = await getDownloadURL(storageRef);
-  return downloadURL;
+  const { data, error } = await supabase.storage
+    .from(bucketName)
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (error) {
+    console.error("Supabase Storage upload error:", error);
+    throw new Error(`Upload failed: ${error.message}`);
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from(bucketName)
+    .getPublicUrl(filePath);
+
+  return publicUrl;
 };

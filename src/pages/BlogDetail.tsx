@@ -752,7 +752,7 @@ const BlogDetail: React.FC = () => {
           <img
             src={blog.cover_image}
             alt={blog.title}
-            className="w-full h-96 object-cover"
+            className="w-full aspect-video object-cover"
           />
 
           <div className="p-8">
