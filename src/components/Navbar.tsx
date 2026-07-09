@@ -25,6 +25,8 @@ import {
   Tag,
   Bookmark,
   ShieldAlert,
+  Download,
+  Folder,
 } from 'lucide-react';
 import NotificationDropdown from './NotificationDropdown';
 import { useTheme } from '../context/ThemeContext';
@@ -56,6 +58,37 @@ const Navbar: React.FC = () => {
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const ease = 'power3.out';
+
+  // --- PWA INSTALL PROMPT LOGIC ---
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallBtn(false);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to install prompt: ${outcome}`);
+    setDeferredPrompt(null);
+    setShowInstallBtn(false);
+  };
 
   // --- Dynamic Content Generation ---
   const items = useMemo(() => {
@@ -140,6 +173,12 @@ const Navbar: React.FC = () => {
             to: '/bookmarks',
             ariaLabel: 'View your bookmarked posts',
             icon: Bookmark,
+          },
+          {
+            label: 'Reading Lists',
+            to: '/reading-lists',
+            ariaLabel: 'View your reading lists',
+            icon: Folder,
           },
         ],
       });
@@ -346,6 +385,17 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Auth & Theme Toggle (from old Navbar) */}
           <div className="hidden md:flex items-center space-x-4 order-3">
+            {showInstallBtn && (
+              <button
+                onClick={handleInstallClick}
+                className="p-2 rounded-lg hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-colors cursor-target text-blue-600 dark:text-blue-400"
+                aria-label="Install App"
+                title="Install Bloggazers App"
+              >
+                <Download className="w-5 h-5 animate-pulse" />
+              </button>
+            )}
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-colors cursor-target"

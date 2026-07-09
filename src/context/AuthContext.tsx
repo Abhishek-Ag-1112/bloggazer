@@ -47,16 +47,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { onSnapshot } = await import('firebase/firestore');
 
         unsubscribeUserDoc = onSnapshot(userDocRef, async (snapshot) => {
-          if (snapshot.exists()) {
+            if (snapshot.exists()) {
             // User exists, update state
             const data = snapshot.data();
             let role = data.role || 'user';
-
-            // DEVELOPMENT ONLY: Automatically promote signed-in user to admin for testing.
-            if (role !== 'admin') {
-              role = 'admin';
-              await setDoc(userDocRef, { role: 'admin' }, { merge: true });
-            }
 
             setUser({ id: snapshot.id, ...data, role } as User);
             setLoading(false);
@@ -70,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               avatar_url: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
               bio: '',
               status: 'pending',
-              role: 'admin', // DEVELOPMENT ONLY: Default to admin
+              role: 'user', // Default to user
               username: '',
               socials: {},
               profession: ''

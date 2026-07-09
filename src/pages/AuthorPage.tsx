@@ -104,12 +104,26 @@ const AuthorPage: React.FC = () => {
         if (foundUser) {
           setAuthor(foundUser);
 
-          const constraints = [
+          const constraintsMain = [
             where('author_id', '==', authorId),
-            orderBy('created_at', 'desc'),
           ];
-          const { blogs: foundBlogs } = await fetchBlogs(constraints, 100, null);
-          setBlogs(foundBlogs);
+          const constraintsCo = [
+            where('co_author_ids', 'array-contains', authorId),
+          ];
+
+          const [resMain, resCo] = await Promise.all([
+            fetchBlogs(constraintsMain, 100, null),
+            fetchBlogs(constraintsCo, 100, null)
+          ]);
+
+          const allMerged = [...resMain.blogs, ...resCo.blogs];
+          const uniqueBlogsMap = new Map<string, Blog>();
+          allMerged.forEach(b => uniqueBlogsMap.set(b.id, b));
+          const sortedBlogs = [...uniqueBlogsMap.values()].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+
+          setBlogs(sortedBlogs);
         } else {
           console.error("No user found with this ID");
         }

@@ -1,6 +1,6 @@
 // src/pages/Profile.tsx
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Mail, Calendar, Edit, FileText, Github, Linkedin, Twitter,
   Link as LinkIcon, Share2, Copy, Check, GraduationCap, Briefcase,
@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { Blog, ReadingList } from '../types';
 import { fetchBlogs, deleteBlog } from '../utils/firebaseHelpers';
-import { where, orderBy } from 'firebase/firestore';
+import { where, orderBy, collection, query, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import BlogCard from '../components/BlogCard';
 import BlogCardSkeleton from '../components/BlogCardSkeleton';
@@ -24,9 +24,19 @@ const Profile: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   // --- READING LISTS TAB STATE ---
-  const [activeTab, setActiveTab] = useState<'blogs' | 'lists'>('blogs');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'lists' ? 'lists' : 'blogs';
+  const [activeTab, setActiveTab] = useState<'blogs' | 'lists'>(initialTab);
   const [readingLists, setReadingLists] = useState<any[]>([]);
   const [loadingLists, setLoadingLists] = useState(false);
+
+  // Sync tab state with URL query param
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'lists' || tab === 'blogs') {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // Get the profile URL for sharing
   const profileUrl = `${window.location.origin}/author/${user?.id}`;
@@ -76,14 +86,32 @@ const Profile: React.FC = () => {
     if (user) {
       const getBlogs = async () => {
         setLoading(true);
-        const constraints = [
-          where('author_id', '==', user.id),
-          orderBy('created_at', 'desc'),
-        ];
+        try {
+          const constraintsMain = [
+            where('author_id', '==', user.id),
+          ];
+          const constraintsCo = [
+            where('co_author_ids', 'array-contains', user.id),
+          ];
 
-        const { blogs } = await fetchBlogs(constraints, 100, null);
-        setUserBlogs(blogs);
-        setLoading(false);
+          const [resMain, resCo] = await Promise.all([
+            fetchBlogs(constraintsMain, 100, null),
+            fetchBlogs(constraintsCo, 100, null)
+          ]);
+
+          const allMerged = [...resMain.blogs, ...resCo.blogs];
+          const uniqueBlogsMap = new Map<string, Blog>();
+          allMerged.forEach(b => uniqueBlogsMap.set(b.id, b));
+          const sortedBlogs = [...uniqueBlogsMap.values()].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+
+          setUserBlogs(sortedBlogs);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
       };
 
       getBlogs();
@@ -95,7 +123,6 @@ const Profile: React.FC = () => {
       const getReadingLists = async () => {
         setLoadingLists(true);
         try {
-          const { collection, query, getDocs } = await import('firebase/firestore');
           const q = query(
             collection(db, 'reading_lists'),
             where('user_id', '==', user.id)
@@ -113,7 +140,7 @@ const Profile: React.FC = () => {
 
           // Map list with blogs populated
           const listsWithBlogs = listsData.map(list => {
-            const blogsInList = list.blog_ids
+            const blogsInList = (list.blog_ids || [])
               .map(id => blogMap.get(id))
               .filter(Boolean) as Blog[];
             return {
@@ -124,7 +151,7 @@ const Profile: React.FC = () => {
 
           setReadingLists(listsWithBlogs);
         } catch (e) {
-          console.error(e);
+          console.error("Error loading reading lists:", e);
           toast.error("Failed to load reading lists.");
         } finally {
           setLoadingLists(false);
@@ -137,12 +164,11 @@ const Profile: React.FC = () => {
   const handleDeleteList = async (listId: string) => {
     if (!window.confirm("Are you sure you want to delete this reading list? This cannot be undone.")) return;
     try {
-      const { deleteDoc, doc } = await import('firebase/firestore');
       await deleteDoc(doc(db, 'reading_lists', listId));
       setReadingLists(prev => prev.filter(l => l.id !== listId));
       toast.success("Reading list deleted.");
     } catch (e) {
-      console.error(e);
+      console.error("Error deleting reading list:", e);
       toast.error("Failed to delete reading list.");
     }
   };

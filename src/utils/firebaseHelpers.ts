@@ -146,15 +146,31 @@ export const fetchBlogs = async (
 
   if (blogsSnapshot.empty) return { blogs: [], lastDoc: null };
 
-  const authorIds = [
-    ...new Set(blogsSnapshot.docs.map((d) => (d.data() as BlogBase).author_id)),
-  ];
+  // Collect all author IDs (primary and co-authors)
+  const authorIdsSet = new Set<string>();
+  blogsSnapshot.docs.forEach((d) => {
+    const data = d.data() as BlogBase;
+    if (data.author_id) authorIdsSet.add(data.author_id);
+    if (data.co_author_ids && Array.isArray(data.co_author_ids)) {
+      data.co_author_ids.forEach((id: string) => authorIdsSet.add(id));
+    }
+  });
 
-  const authorMap = await fetchUsers(authorIds);
+  const authorMap = await fetchUsers([...authorIdsSet]);
 
   const blogs = blogsSnapshot.docs.map((blogDoc) => {
     const blog = docToBlog(blogDoc);
+    const data = blogDoc.data() as BlogBase;
     blog.author = authorMap.get(blog.author_id);
+
+    // Populate co-authors
+    if (data.co_author_ids && Array.isArray(data.co_author_ids)) {
+      blog.co_authors = data.co_author_ids
+        .map((id: string) => authorMap.get(id))
+        .filter(Boolean) as User[];
+    } else {
+      blog.co_authors = [];
+    }
     return blog;
   });
 
@@ -177,8 +193,20 @@ export const fetchBlogBySlug = async (
 
   const blogDoc = snapshot.docs[0];
   const blog = docToBlog(blogDoc);
+  const data = blogDoc.data() as BlogBase;
 
+  // Fetch primary author
   blog.author = await fetchUser(blog.author_id);
+
+  // Fetch co-authors
+  if (data.co_author_ids && Array.isArray(data.co_author_ids) && data.co_author_ids.length > 0) {
+    const coAuthorMap = await fetchUsers(data.co_author_ids);
+    blog.co_authors = data.co_author_ids
+      .map((id: string) => coAuthorMap.get(id))
+      .filter(Boolean) as User[];
+  } else {
+    blog.co_authors = [];
+  }
   return blog;
 };
 
@@ -323,13 +351,31 @@ export const fetchBookmarkedBlogs = async (userId: string): Promise<Blog[]> => {
     const blogsQuery = query(collection(db, 'blogs'), where(documentId(), 'in', batch));
     const blogsSnapshot = await getDocs(blogsQuery);
 
-    // We need to fetch authors for these blogs too
-    const authorIds = [...new Set(blogsSnapshot.docs.map(d => (d.data() as BlogBase).author_id))];
-    const authorMap = await fetchUsers(authorIds);
+    // We need to fetch authors and co-authors for these blogs
+    const authorIdsSet = new Set<string>();
+    blogsSnapshot.docs.forEach((d) => {
+      const data = d.data() as BlogBase;
+      if (data.author_id) authorIdsSet.add(data.author_id);
+      if (data.co_author_ids && Array.isArray(data.co_author_ids)) {
+        data.co_author_ids.forEach((id: string) => authorIdsSet.add(id));
+      }
+    });
+
+    const authorMap = await fetchUsers([...authorIdsSet]);
 
     blogsSnapshot.forEach((blogDoc) => {
       const blog = docToBlog(blogDoc);
+      const data = blogDoc.data() as BlogBase;
       blog.author = authorMap.get(blog.author_id);
+
+      // Populate co-authors
+      if (data.co_author_ids && Array.isArray(data.co_author_ids)) {
+        blog.co_authors = data.co_author_ids
+          .map((id: string) => authorMap.get(id))
+          .filter(Boolean) as User[];
+      } else {
+        blog.co_authors = [];
+      }
       blogs.push(blog);
     });
   }

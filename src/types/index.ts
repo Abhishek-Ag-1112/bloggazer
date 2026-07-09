@@ -91,11 +91,13 @@ export interface BlogBase extends FirestoreTimestamps {
   published: boolean;
   likes: string[]; // <-- ADD THIS
   reactions?: Record<string, string[]>; // Map of emoji -> array of user_ids
+  co_author_ids?: string[]; // Array of co-author user IDs
 }
 
 // Blog type used in the app, with author details populated
 export interface Blog extends Omit<BlogBase, 'created_at' | 'updated_at'> {
   author?: User; // Author data will be joined
+  co_authors?: User[]; // Co-authors data will be joined
   created_at: string; // Converted to ISO string for easier use
   updated_at: string; // Converted to ISO string for easier use
 }

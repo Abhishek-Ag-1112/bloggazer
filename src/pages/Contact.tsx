@@ -80,10 +80,10 @@ const Contact: React.FC = () => {
                     Email
                   </h3>
                   <a
-                    href="mailto:contact@Bloggazers.com"
+                    href="mailto:contact@bloggazers.in"
                     className="text-blue-600 dark:text-blue-400 hover:underline"
                   >
-                    contact@Bloggazers.com
+                    contact@bloggazers.in
                   </a>
                 </div>
               </div>

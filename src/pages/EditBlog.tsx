@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { fetchBlogBySlug } from '../utils/firebaseHelpers';
-import { Blog } from '../types';
+import { Blog, User } from '../types';
 import ReactMde from 'react-mde'; // <-- 1. IMPORT
 import ReactMarkdown from 'react-markdown'; // <-- 2. IMPORT
 
@@ -26,6 +26,49 @@ const EditBlog: React.FC = () => {
   const [loading, setLoading] = useState(true);
   // 3. ADD STATE FOR TAB
   const [selectedTab, setSelectedTab] = useState<'write' | 'preview'>('write');
+
+  // --- CO-AUTHORS STATE ---
+  const [coAuthors, setCoAuthors] = useState<User[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+
+  // Search users for co-author matching
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const searchUsers = async () => {
+      try {
+        const { query, collection, where, getDocs, limit } = await import('firebase/firestore');
+        const q = query(
+          collection(db, 'users'),
+          where('username', '>=', searchQuery.toLowerCase()),
+          where('username', '<=', searchQuery.toLowerCase() + '\uf8ff'),
+          limit(5)
+        );
+        const snap = await getDocs(q);
+        const matches = snap.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as User))
+          .filter(u => u.id !== user?.id && !coAuthors.some(existing => existing.id === u.id));
+        setSearchResults(matches);
+      } catch (e) {
+        console.error("Error searching users:", e);
+      }
+    };
+    const timer = setTimeout(searchUsers, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, coAuthors, user]);
+
+  const handleAddCoAuthor = (targetUser: User) => {
+    setCoAuthors([...coAuthors, targetUser]);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  const handleRemoveCoAuthor = (id: string) => {
+    setCoAuthors(coAuthors.filter(u => u.id !== id));
+  };
 
   useEffect(() => {
     if (!slug) {
@@ -50,6 +93,7 @@ const EditBlog: React.FC = () => {
       }
 
       setBlog(foundBlog);
+      setCoAuthors(foundBlog.co_authors || []);
       setFormData({
         title: foundBlog.title,
         content: foundBlog.content, // This content is now Markdown
@@ -94,6 +138,7 @@ const EditBlog: React.FC = () => {
         cover_image: formData.coverImage,
         category: formData.category,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
+        co_author_ids: coAuthors.map(u => u.id), // Store co-author user IDs
         updated_at: serverTimestamp(),
       });
       alert('Blog updated successfully!');
@@ -165,6 +210,64 @@ const EditBlog: React.FC = () => {
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-lg font-medium"
                 placeholder="Enter your blog title"
               />
+            </div>
+
+            {/* Co-Authors Selection */}
+            <div className="p-4 bg-gray-50 dark:bg-gray-800/40 rounded-xl border border-gray-250 dark:border-gray-750">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                Co-authors (Collaborators)
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search registered user by username..."
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-850 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                />
+                
+                {/* Search Results Dropdown */}
+                {searchResults.length > 0 && (
+                  <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto">
+                    {searchResults.map(match => (
+                      <button
+                        key={match.id}
+                        type="button"
+                        onClick={() => handleAddCoAuthor(match)}
+                        className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-850 text-left transition-colors cursor-target"
+                      >
+                        <img src={match.avatar_url} alt={match.full_name} className="w-8 h-8 rounded-full" />
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{match.full_name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">@{match.username}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Selected Co-Authors Chips */}
+              {coAuthors.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {coAuthors.map(author => (
+                    <div
+                      key={author.id}
+                      className="flex items-center space-x-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-full border border-blue-100 dark:border-blue-900/50"
+                    >
+                      <img src={author.avatar_url} alt={author.full_name} className="w-5 h-5 rounded-full" />
+                      <span className="text-sm font-medium">{author.full_name}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCoAuthor(author.id)}
+                        className="text-xs hover:text-red-500 font-bold transition-colors cursor-pointer pl-1"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Excerpt (Unchanged) */}

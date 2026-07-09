@@ -29,7 +29,7 @@ const Security: React.FC = () => {
                         {/* Introduction */}
                         <div className="prose prose-lg dark:prose-invert max-w-none mb-12">
                             <p className="text-lg text-gray-600 dark:text-gray-300">
-                                At AbhiWrites (Bloggazers), security is at the core of everything we do. We employ industry-leading security practices to ensure your data remains protected at all times. This page outlines our security measures and commitment to keeping your information safe.
+                                At Bloggazers.in, security is at the core of everything we do. We employ industry-leading security practices to ensure your data remains protected at all times. This page outlines our security measures and commitment to keeping your information safe.
                             </p>
                         </div>
 

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bloggazers.com/sitemap.xml
+Sitemap: https://bloggazers.in/sitemap.xml

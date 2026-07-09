@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 // Simple env loader to get Firebase Project ID
 const envPaths = ['.env', '.env.local', '.env.production', '.env.development'];
 let projectId = '';
-let siteUrl = 'https://bloggazers.com'; // Default production URL
+let siteUrl = 'https://bloggazers.in'; // Default production URL
 
 for (const envFile of envPaths) {
   const fullPath = path.join(__dirname, '..', envFile);

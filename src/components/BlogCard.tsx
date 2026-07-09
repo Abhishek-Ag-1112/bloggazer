@@ -53,7 +53,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
         <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-400 mb-3">
           <div className="flex items-center space-x-1">
             <User className="w-4 h-4" />
-            <span>{blog.author?.full_name || '...'}</span>
+            <span>
+              {blog.author?.full_name || '...'}
+              {blog.co_authors && blog.co_authors.length > 0 && ` + ${blog.co_authors.length}`}
+            </span>
           </div>
           <div className="flex items-center space-x-1">
             <Calendar className="w-4 h-4" />

@@ -44,6 +44,7 @@ export const ReadingListModal: React.FC<ReadingListModalProps> = ({ blogId, isOp
         const data = d.data();
         return {
           id: d.id,
+          blog_ids: data.blog_ids || [],
           ...data,
           created_at: data.created_at ? data.created_at.toDate().toISOString() : new Date().toISOString()
         };

@@ -23,8 +23,7 @@ export const NotificationDropdown: React.FC = () => {
     const q = query(
       collection(db, 'notifications'),
       where('recipient_id', '==', user.id),
-      orderBy('created_at', 'desc'),
-      limit(20)
+      limit(100)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -36,7 +35,12 @@ export const NotificationDropdown: React.FC = () => {
           created_at: data.created_at ? data.created_at.toDate().toISOString() : new Date().toISOString()
         };
       }) as Notification[];
-      setNotifications(fetched);
+
+      // Sort notifications in-memory by created_at desc to avoid composite index requirements
+      const sorted = fetched.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setNotifications(sorted.slice(0, 20)); // Limit to most recent 20
     }, (error) => {
       console.error("Notifications listener error: ", error);
     });

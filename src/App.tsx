@@ -26,6 +26,7 @@ import NavigationLoader from './components/NavigationLoader';
 import RegistrationGuard from './components/RegistrationGuard';
 import FinishProfile from './pages/FinishProfile';
 import Bookmarks from './pages/Bookmarks';
+import ReadingListsPage from './pages/ReadingListsPage';
 import SearchPage from './pages/SearchPage';
 import NotFoundPage from './pages/NotFoundPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -123,6 +124,7 @@ const AppContent: React.FC = () => {
                 <Route path="/profile/edit" element={<EditProfile />} />
                 <Route path="/edit-blog/:slug" element={<EditBlog />} />
                 <Route path="/bookmarks" element={<Bookmarks />} /> {/* <-- ADDED */}
+                <Route path="/reading-lists" element={<ReadingListsPage />} />
               </Route>
             </Route>
 

@@ -315,55 +315,64 @@ const BlogDetail: React.FC = () => {
       setComments([]);
       setRelatedBlogs([]);
 
-      const foundBlog = await fetchBlogBySlug(slug); // <-- Reverted call
+      try {
+        const foundBlog = await fetchBlogBySlug(slug);
 
-      if (foundBlog) {
+        if (foundBlog) {
+          // --- VIEW COUNT FIX ---
+          const viewKey = `viewed_${foundBlog.id}`;
+          const hasViewed = sessionStorage.getItem(viewKey);
 
-        // --- VIEW COUNT FIX ---
-        const viewKey = `viewed_${foundBlog.id}`;
-        const hasViewed = sessionStorage.getItem(viewKey);
-
-        if (!hasViewed) {
-          // Optimistically update UI for view count
-          setBlog({ ...foundBlog, views: foundBlog.views + 1 });
-          // Trigger "fire-and-forget" view increment in DB
-          incrementBlogView(foundBlog.id);
-          // Mark as viewed in this session
-          sessionStorage.setItem(viewKey, 'true');
-        } else {
-          // Just set the blog data without incrementing
-          setBlog(foundBlog);
-        }
-        // --- END VIEW COUNT FIX ---
-
-        // Fetch comments and related blogs
-        const relatedConstraints = [
-          where('category', '==', foundBlog.category),
-          where('slug', '!=', foundBlog.slug),
-          orderBy('slug'), // Required for '!='
-          orderBy('created_at', 'desc'),
-          limit(3)
-        ];
-
-        const [foundComments, related] = await Promise.all([
-          fetchComments(foundBlog.id),
-          fetchBlogs(relatedConstraints, 3)
-        ]);
-
-        setComments(foundComments); // <-- SET FLAT LIST
-        setRelatedBlogs(related.blogs);
-
-        // Check bookmark status
-        if (user) {
-          const userData = await fetchUser(user.id);
-          if (userData && userData.bookmarks?.includes(foundBlog.id)) {
-            setIsBookmarked(true);
+          if (!hasViewed) {
+            // Optimistically update UI for view count
+            setBlog({ ...foundBlog, views: foundBlog.views + 1 });
+            // Trigger "fire-and-forget" view increment in DB
+            incrementBlogView(foundBlog.id);
+            // Mark as viewed in this session
+            sessionStorage.setItem(viewKey, 'true');
           } else {
-            setIsBookmarked(false);
+            // Just set the blog data without incrementing
+            setBlog(foundBlog);
+          }
+          // --- END VIEW COUNT FIX ---
+
+          // Fetch related blogs in the same category (fetch 4 in case the current one is returned)
+          const relatedConstraints = [
+            where('category', '==', foundBlog.category),
+            limit(4)
+          ];
+
+          const [foundComments, related] = await Promise.all([
+            fetchComments(foundBlog.id),
+            fetchBlogs(relatedConstraints, 4)
+          ]);
+
+          setComments(foundComments); // <-- SET FLAT LIST
+          
+          // Filter out current blog and sort by date descending in memory to avoid composite index errors
+          const filteredRelated = related.blogs
+            .filter(b => b.id !== foundBlog.id)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 3);
+
+          setRelatedBlogs(filteredRelated);
+
+          // Check bookmark status
+          if (user) {
+            const userData = await fetchUser(user.id);
+            if (userData && userData.bookmarks?.includes(foundBlog.id)) {
+              setIsBookmarked(true);
+            } else {
+              setIsBookmarked(false);
+            }
           }
         }
+      } catch (error) {
+        console.error("Error loading blog data:", error);
+        toast.error("Failed to load blog details.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getBlogData();
@@ -714,14 +723,14 @@ const BlogDetail: React.FC = () => {
         <title>{blog.title} | Bloggazers</title>
         <meta name="description" content={blog.excerpt} />
         <meta name="keywords" content={blog.tags.join(', ')} />
-        <link rel="canonical" href={`https://bloggazers.com/blog/${blog.slug}`} />
+        <link rel="canonical" href={`https://bloggazers.in/blog/${blog.slug}`} />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="article" />
         <meta property="og:title" content={`${blog.title} | Bloggazers`} />
         <meta property="og:description" content={blog.excerpt} />
         <meta property="og:image" content={blog.cover_image} />
-        <meta property="og:url" content={`https://bloggazers.com/blog/${blog.slug}`} />
+        <meta property="og:url" content={`https://bloggazers.in/blog/${blog.slug}`} />
         <meta property="og:site_name" content="Bloggazers" />
 
         {/* Twitter */}
@@ -757,19 +766,46 @@ const BlogDetail: React.FC = () => {
 
             <div className="flex flex-wrap gap-4 items-center justify-between mb-8 pb-8 border-b border-gray-200 dark:border-gray-800">
 
-              <Link
-                to={`/author/${blog.author_id}`}
-                className="flex items-center space-x-3 group"
-                title={`View all posts by ${blog.author?.full_name}`}
-              >
-                <img
-                  src={blog.author?.avatar_url}
-                  alt={blog.author?.full_name}
-                  className="w-12 h-12 rounded-full group-hover:ring-4 group-hover:ring-blue-600/50 transition-all"
-                />
+              <div className="flex flex-wrap items-center gap-4">
+                {/* Avatars */}
+                <div className="flex -space-x-3 overflow-hidden">
+                  <Link to={`/author/${blog.author_id}`} className="inline-block" title={blog.author?.full_name}>
+                    <img
+                      src={blog.author?.avatar_url}
+                      alt={blog.author?.full_name}
+                      className="inline-block h-12 w-12 rounded-full ring-2 ring-white dark:ring-gray-900 hover:scale-105 transition-transform"
+                    />
+                  </Link>
+                  {blog.co_authors && blog.co_authors.map(co => (
+                    <Link key={co.id} to={`/author/${co.id}`} className="inline-block" title={co.full_name}>
+                      <img
+                        src={co.avatar_url}
+                        alt={co.full_name}
+                        className="inline-block h-12 w-12 rounded-full ring-2 ring-white dark:ring-gray-900 hover:scale-105 transition-transform"
+                      />
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Names */}
                 <div>
-                  <p className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {blog.author?.full_name}
+                  <p className="font-semibold text-gray-900 dark:text-white flex flex-wrap items-center gap-1">
+                    <Link to={`/author/${blog.author_id}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                      {blog.author?.full_name}
+                    </Link>
+                    {blog.co_authors && blog.co_authors.length > 0 && (
+                      <>
+                        <span className="text-gray-500 font-normal">and</span>
+                        {blog.co_authors.map((co, index) => (
+                          <React.Fragment key={co.id}>
+                            <Link to={`/author/${co.id}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                              {co.full_name}
+                            </Link>
+                            {index < blog.co_authors!.length - 1 && <span className="text-gray-500 font-normal">,</span>}
+                          </React.Fragment>
+                        ))}
+                      </>
+                    )}
                   </p>
                   <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center space-x-1">
@@ -782,7 +818,7 @@ const BlogDetail: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
 
               <div className="flex items-center space-x-2">
                 <button
@@ -849,8 +885,6 @@ const BlogDetail: React.FC = () => {
             </div>
             {/* --- END OF REPLACEMENT --- */}
 
-            <EmojiReactions blogId={blog.id} />
-
             <div className="flex flex-wrap gap-2 mb-8">
               {blog.tags.map((tag, index) => (
                 <span
@@ -866,6 +900,12 @@ const BlogDetail: React.FC = () => {
 
         {/* --- Comments Section --- */}
         <div className="mt-12 bg-white/65 dark:bg-gray-950/40 rounded-xl p-8 shadow-lg border border-gray-200 dark:border-gray-800">
+          
+          {/* Reaction Bar (Moved here to sit above the comment input) */}
+          <div className="mb-8 border-b border-gray-200 dark:border-gray-800 pb-6">
+            <EmojiReactions blogId={blog.id} />
+          </div>
+
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
             <MessageCircle className="w-6 h-6" />
             <span>Comments ({comments.length})</span>

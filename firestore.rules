@@ -34,10 +34,26 @@ service cloud.firestore {
       allow update, delete: if request.auth != null && resource.data.user_id == request.auth.uid;
     }
 
-    // Contacts: Anyone can create, but no one can read (admin only).
+    // Reading Lists: A user can manage their own lists
+    match /reading_lists/{listId} {
+      allow read, create, update, delete: if request.auth != null && (
+        (resource == null && request.resource.data.user_id == request.auth.uid) || 
+        (resource != null && resource.data.user_id == request.auth.uid)
+      );
+    }
+
+    // Notifications: Users can read/update their own notifications; any logged-in user can create them (for mentions/replies).
+    match /notifications/{notificationId} {
+      allow read, update, delete: if request.auth != null && resource.data.recipient_id == request.auth.uid;
+      allow create: if request.auth != null;
+    }
+
+    // Contacts: Anyone can create, but only admins can read or delete.
     match /contacts/{contactId} {
-      allow read, update, delete: if false;
+      allow read, delete: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
       allow create: if true;
+      allow update: if false;
     }
   }
 }
