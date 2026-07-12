@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase'; // <-- RESTORED
 import ReactMde from 'react-mde'; // <-- RESTORED
@@ -108,11 +109,17 @@ const CreateBlog: React.FC = () => {
         updated_at: serverTimestamp(),
         likes: [],
       });
-      alert('Blog created successfully!');
-      navigate('/blogs');
+
+      // Trigger Netlify build hook to regenerate sitemap and redeploy the site
+      fetch('https://api.netlify.com/build_hooks/6a53656a8f53d49e5f3aa2d1', {
+        method: 'POST'
+      }).catch(err => console.error("Error triggering Netlify build hook:", err));
+
+      toast.success('Blog created successfully!');
+      navigate(`/blog/${slug}`);
     } catch (error) {
       console.error('Error creating blog:', error);
-      alert('Failed to create blog. Please try again.');
+      toast.error('Failed to create blog. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

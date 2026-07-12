@@ -32,8 +32,38 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://bloggazersin.netlify.app/blog/efef</loc>
-    <lastmod>2026-07-09T04:52:17.284Z</lastmod>
+    <loc>https://bloggazersin.netlify.app/blog/why-running-llms-locally-is-the-ultimate-tech-power-move</loc>
+    <lastmod>2026-07-09T07:22:35.754Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bloggazersin.netlify.app/blog/hello-world-i-m-abhishek-agarwal-building-the-future-with-data-ai-and-code</loc>
+    <lastmod>2026-07-11T07:31:33.755Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bloggazersin.netlify.app/blog/the-shift-to-edge-first-web-development</loc>
+    <lastmod>2026-07-09T08:11:43.509Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bloggazersin.netlify.app/blog/beyond-chatbots-how-autonomous-ai-agents-are-redefining-productivity</loc>
+    <lastmod>2026-07-09T07:02:19.539Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bloggazersin.netlify.app/blog/ai-driven-cyber-threats-the-new-frontier-of-digital-security</loc>
+    <lastmod>2026-07-09T08:15:28.408Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bloggazersin.netlify.app/blog/mastering-react-19-server-components-and-beyond</loc>
+    <lastmod>2026-07-09T08:13:46.993Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

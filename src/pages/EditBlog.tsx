@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { fetchBlogBySlug } from '../utils/firebaseHelpers';
@@ -81,13 +82,13 @@ const EditBlog: React.FC = () => {
       const foundBlog = await fetchBlogBySlug(slug);
 
       if (!foundBlog) {
-        alert('Blog not found!');
+        toast.error('Blog not found!');
         navigate('/profile');
         return;
       }
 
       if (foundBlog.author_id !== user?.id) {
-        alert('You are not authorized to edit this blog.');
+        toast.error('You are not authorized to edit this blog.');
         navigate('/profile');
         return;
       }
@@ -141,11 +142,17 @@ const EditBlog: React.FC = () => {
         co_author_ids: coAuthors.map(u => u.id), // Store co-author user IDs
         updated_at: serverTimestamp(),
       });
-      alert('Blog updated successfully!');
+
+      // Trigger Netlify build hook to regenerate sitemap and redeploy the site
+      fetch('https://api.netlify.com/build_hooks/6a53656a8f53d49e5f3aa2d1', {
+        method: 'POST'
+      }).catch(err => console.error("Error triggering Netlify build hook:", err));
+
+      toast.success('Blog updated successfully!');
       navigate(`/blog/${newSlug}`); 
     } catch (error) {
       console.error('Error updating blog:', error);
-      alert('Failed to update blog. Please try again.');
+      toast.error('Failed to update blog. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs, query, limit, orderBy, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Blog } from '../../types';
+import { deleteBlog } from '../../utils/firebaseHelpers';
 import toast from 'react-hot-toast';
 import { Search, Trash2, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -42,7 +43,7 @@ const ManageBlogs: React.FC = () => {
         if (!window.confirm("Are you sure you want to delete this blog?")) return;
 
         try {
-            await deleteDoc(doc(db, 'blogs', blogId));
+            await deleteBlog(blogId);
             setBlogs(prev => prev.filter(b => b.id !== blogId));
             toast.success("Blog deleted");
         } catch (error) {

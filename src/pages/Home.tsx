@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, TrendingUp, Users } from 'lucide-react';
+import toast from 'react-hot-toast';
 import BlogCard from '../components/BlogCard';
 import { Blog } from '../types';
 import { fetchBlogs } from '../utils/firebaseHelpers';
@@ -193,7 +194,7 @@ const Home: React.FC = () => {
                   const emailInput = form.elements.namedItem('newsletter-email') as HTMLInputElement;
                   if (emailInput.value.trim()) {
                     // Simulate subscription
-                    alert('Thanks for subscribing!');
+                    toast.success('Thanks for subscribing!');
                     emailInput.value = '';
                   }
                 }}

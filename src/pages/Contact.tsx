@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, CheckCircle } from 'lucide-react'; // <-- REMOVED Send
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+import toast from 'react-hot-toast';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -34,7 +35,7 @@ const Contact: React.FC = () => {
 
     } catch (error) {
       console.error('Error submitting contact form:', error);
-      alert('Failed to send message. Please try again later.');
+      toast.error('Failed to send message. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }

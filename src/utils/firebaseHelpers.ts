@@ -277,6 +277,11 @@ export const deleteBlog = async (blogId: string) => {
     deleteDoc(doc(db, 'comments', commentDoc.id))
   );
   await Promise.all(deletePromises);
+
+  // Trigger Netlify build hook to regenerate sitemap and redeploy the site
+  fetch('https://api.netlify.com/build_hooks/6a53656a8f53d49e5f3aa2d1', {
+    method: 'POST'
+  }).catch(err => console.error("Error triggering Netlify build hook:", err));
 };
 
 // --- Comment Modification ---

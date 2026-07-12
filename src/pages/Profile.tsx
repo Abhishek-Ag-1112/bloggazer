@@ -182,10 +182,10 @@ const Profile: React.FC = () => {
       try {
         await deleteBlog(id);
         setUserBlogs(prevBlogs => prevBlogs.filter(blog => blog.id !== id));
-        alert('Blog deleted successfully.');
+        toast.success('Blog deleted successfully.');
       } catch (error) {
         console.error("Error deleting blog: ", error);
-        alert('Failed to delete blog.');
+        toast.error('Failed to delete blog.');
       }
     }
   };

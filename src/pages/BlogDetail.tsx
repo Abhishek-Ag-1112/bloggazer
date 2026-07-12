@@ -336,35 +336,43 @@ const BlogDetail: React.FC = () => {
           }
           // --- END VIEW COUNT FIX ---
 
-          // Fetch related blogs in the same category (fetch 4 in case the current one is returned)
-          const relatedConstraints = [
-            where('category', '==', foundBlog.category),
-            limit(4)
-          ];
+          // Fetch related blogs and comments (wrapped to prevent breaking main blog render)
+          try {
+            const relatedConstraints = [
+              where('category', '==', foundBlog.category),
+              limit(4)
+            ];
 
-          const [foundComments, related] = await Promise.all([
-            fetchComments(foundBlog.id),
-            fetchBlogs(relatedConstraints, 4)
-          ]);
+            const [foundComments, related] = await Promise.all([
+              fetchComments(foundBlog.id),
+              fetchBlogs(relatedConstraints, 4)
+            ]);
 
-          setComments(foundComments); // <-- SET FLAT LIST
-          
-          // Filter out current blog and sort by date descending in memory to avoid composite index errors
-          const filteredRelated = related.blogs
-            .filter(b => b.id !== foundBlog.id)
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 3);
+            setComments(foundComments); // <-- SET FLAT LIST
+            
+            // Filter out current blog and sort by date descending in memory to avoid composite index errors
+            const filteredRelated = related.blogs
+              .filter(b => b.id !== foundBlog.id)
+              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+              .slice(0, 3);
 
-          setRelatedBlogs(filteredRelated);
+            setRelatedBlogs(filteredRelated);
+          } catch (auxError) {
+            console.warn("Failed to load comments or related blogs:", auxError);
+          }
 
-          // Check bookmark status
-          if (user) {
-            const userData = await fetchUser(user.id);
-            if (userData && userData.bookmarks?.includes(foundBlog.id)) {
-              setIsBookmarked(true);
-            } else {
-              setIsBookmarked(false);
+          // Check bookmark status (wrapped to prevent breaking main blog render)
+          try {
+            if (user) {
+              const userData = await fetchUser(user.id);
+              if (userData && userData.bookmarks?.includes(foundBlog.id)) {
+                setIsBookmarked(true);
+              } else {
+                setIsBookmarked(false);
+              }
             }
+          } catch (bookmarkError) {
+            console.warn("Failed to load bookmark status:", bookmarkError);
           }
         }
       } catch (error) {
