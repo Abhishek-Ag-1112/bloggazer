@@ -33,10 +33,13 @@ const CategoriesPage: React.FC = () => {
         const snap = await getDocs(q);
         const blogs = snap.docs.map(doc => doc.data());
         
-        // Count blogs per category
+        // Count blogs per category (normalizing casing to match CATEGORIES_META)
         const counts: Record<string, number> = {};
+        const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+
         blogs.forEach(blog => {
-          const cat = blog.category || 'General';
+          const rawCat = blog.category || 'General';
+          const cat = capitalize(rawCat.trim());
           counts[cat] = (counts[cat] || 0) + 1;
         });
 

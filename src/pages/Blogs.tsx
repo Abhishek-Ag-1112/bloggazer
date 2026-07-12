@@ -43,7 +43,15 @@ const Blogs: React.FC = () => {
       const constraints: QueryConstraint[] = [orderBy('created_at', 'desc')];
 
       if (selectedCategory !== 'All') {
-        constraints.push(where('category', '==', selectedCategory));
+        const capitalized = selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1).toLowerCase();
+        constraints.push(
+          where('category', 'in', [
+            selectedCategory,
+            selectedCategory.toLowerCase(),
+            selectedCategory.toUpperCase(),
+            capitalized
+          ])
+        );
       }
       if (selectedTag) {
         constraints.push(where('tags', 'array-contains', selectedTag));
@@ -77,7 +85,15 @@ const Blogs: React.FC = () => {
 
     const constraints: QueryConstraint[] = [orderBy('created_at', 'desc')];
     if (selectedCategory !== 'All') {
-      constraints.push(where('category', '==', selectedCategory));
+      const capitalized = selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1).toLowerCase();
+      constraints.push(
+        where('category', 'in', [
+          selectedCategory,
+          selectedCategory.toLowerCase(),
+          selectedCategory.toUpperCase(),
+          capitalized
+        ])
+      );
     }
     if (selectedTag) {
       constraints.push(where('tags', 'array-contains', selectedTag));
